@@ -201,14 +201,9 @@ export async function sendEmailVerification(
 }
 
 export async function createUserSendEmailChallenge(
-  email: string,
-  turnstile?: string
+  email: string
 ): Promise<UserSendEmailChallengeResponse> {
-  const res = await api.post(
-    '/api/user_send_email/challenge',
-    { email },
-    { params: { turnstile: turnstile ?? '' } }
-  )
+  const res = await api.post('/api/user_send_email/challenge', { email })
   return res.data
 }
 

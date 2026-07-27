@@ -40,7 +40,7 @@ func SetApiRouter(router *gin.Engine) {
 		}
 		apiRouter.GET("/rankings", middleware.HeaderNavModuleAuth("rankings"), controller.GetRankings)
 		apiRouter.GET("/verification", middleware.EmailVerificationRateLimit(), middleware.TurnstileCheck(), controller.SendEmailVerification)
-		apiRouter.POST("/user_send_email/challenge", middleware.EmailVerificationRateLimit(), anonymousRequestBodyLimit, middleware.TurnstileCheck(), controller.CreateUserSendEmailChallenge)
+		apiRouter.POST("/user_send_email/challenge", middleware.EmailVerificationRateLimit(), anonymousRequestBodyLimit, controller.CreateUserSendEmailChallenge)
 		apiRouter.POST("/user_send_email/check", middleware.EmailVerificationRateLimit(), anonymousRequestBodyLimit, controller.CheckUserSendEmailChallenge)
 		apiRouter.GET("/reset_password", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), controller.SendPasswordResetEmail)
 		apiRouter.POST("/user/reset", middleware.CriticalRateLimit(), anonymousRequestBodyLimit, controller.ResetPassword)

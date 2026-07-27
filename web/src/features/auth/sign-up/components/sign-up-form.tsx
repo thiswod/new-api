@@ -252,11 +252,9 @@ export function SignUpForm({
       toast.error(t('Please enter your email'))
       return
     }
-    if (!validateTurnstile()) return
-
     setIsCreatingEmailChallenge(true)
     try {
-      const res = await createUserSendEmailChallenge(emailValue, turnstileToken)
+      const res = await createUserSendEmailChallenge(emailValue)
       if (!res.success || !res.data) {
         toast.error(res.message || t('Failed to create email challenge'))
         return
@@ -478,10 +476,7 @@ export function SignUpForm({
                 variant='outline'
                 type='button'
                 disabled={
-                  isLoading ||
-                  isCreatingEmailChallenge ||
-                  !emailValue ||
-                  !turnstileReady
+                  isLoading || isCreatingEmailChallenge || !emailValue
                 }
                 onClick={handleCreateUserSendEmailChallenge}
                 className='w-full gap-2'
