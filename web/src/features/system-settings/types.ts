@@ -126,7 +126,8 @@ export type AuthSettings = {
   EmailVerificationEnabled: boolean
   UserSendEmailVerificationEnabled: boolean
   CloudMailBaseURL: string
-  CloudMailToken: string
+  CloudMailUsername: string
+  CloudMailPassword: string
   CloudMailRecipient: string
   RegisterEnabled: boolean
   EmailDomainRestrictionEnabled: boolean

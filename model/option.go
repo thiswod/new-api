@@ -41,6 +41,8 @@ func InitOptionMap() {
 	common.OptionMap["EmailVerificationEnabled"] = strconv.FormatBool(common.EmailVerificationEnabled)
 	common.OptionMap["UserSendEmailVerificationEnabled"] = strconv.FormatBool(common.UserSendEmailVerificationEnabled)
 	common.OptionMap["CloudMailBaseURL"] = common.CloudMailBaseURL
+	common.OptionMap["CloudMailUsername"] = common.CloudMailUsername
+	common.OptionMap["CloudMailPassword"] = common.CloudMailPassword
 	common.OptionMap["CloudMailToken"] = common.CloudMailToken
 	common.OptionMap["CloudMailRecipient"] = common.CloudMailRecipient
 	common.OptionMap["GitHubOAuthEnabled"] = strconv.FormatBool(common.GitHubOAuthEnabled)
@@ -398,6 +400,10 @@ func updateOptionMap(key string, value string) (err error) {
 		common.EmailDomainWhitelist = strings.Split(value, ",")
 	case "CloudMailBaseURL":
 		common.CloudMailBaseURL = value
+	case "CloudMailUsername":
+		common.CloudMailUsername = value
+	case "CloudMailPassword":
+		common.CloudMailPassword = value
 	case "CloudMailToken":
 		common.CloudMailToken = value
 	case "CloudMailRecipient":

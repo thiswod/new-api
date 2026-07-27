@@ -165,8 +165,8 @@ func UpdateOption(c *gin.Context) {
 				common.ApiErrorMsg(c, "用户发信验证与邮箱验证码验证不能同时启用")
 				return
 			}
-			if strings.TrimSpace(common.CloudMailBaseURL) == "" || strings.TrimSpace(common.CloudMailToken) == "" || strings.TrimSpace(common.CloudMailRecipient) == "" {
-				common.ApiErrorMsg(c, "无法启用用户发信验证，请先配置 Cloud Mail 地址、Token 和验证收件邮箱")
+			if strings.TrimSpace(common.CloudMailBaseURL) == "" || strings.TrimSpace(common.CloudMailUsername) == "" || strings.TrimSpace(common.CloudMailPassword) == "" || strings.TrimSpace(common.CloudMailRecipient) == "" {
+				common.ApiErrorMsg(c, "无法启用用户发信验证，请先配置 Cloud Mail 地址、管理员邮箱、邮箱密码和验证收件邮箱")
 				return
 			}
 		}

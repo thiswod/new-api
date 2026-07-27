@@ -251,31 +251,9 @@ func SendEmailVerification(c *gin.Context) {
 	}
 	localPart := parts[0]
 	domainPart := parts[1]
-	if common.EmailDomainRestrictionEnabled {
-		allowed := false
-		for _, domain := range common.EmailDomainWhitelist {
-			if domainPart == domain {
-				allowed = true
-				break
-			}
-		}
-		if !allowed {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "The administrator has enabled the email domain name whitelist, and your email address is not allowed due to special symbols or it's not in the whitelist.",
-			})
-			return
-		}
-	}
-	if common.EmailAliasRestrictionEnabled {
-		containsSpecialSymbols := strings.Contains(localPart, "+") || strings.Contains(localPart, ".")
-		if containsSpecialSymbols {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "管理员已启用邮箱地址别名限制，您的邮箱地址由于包含特殊符号而被拒绝。",
-			})
-			return
-		}
+	if message := emailRestrictionError(localPart, domainPart); message != "" {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": message})
+		return
 	}
 
 	if model.IsEmailAlreadyTaken(email) {
@@ -298,6 +276,23 @@ func SendEmailVerification(c *gin.Context) {
 		"message": "",
 	})
 	return
+}
+
+func emailRestrictionError(localPart, domainPart string) string {
+	if common.EmailDomainRestrictionEnabled {
+		for _, domain := range common.EmailDomainWhitelist {
+			if domainPart == domain {
+				goto aliasCheck
+			}
+		}
+		return "The administrator has enabled the email domain name whitelist, and your email address is not allowed due to special symbols or it's not in the whitelist."
+	}
+
+aliasCheck:
+	if common.EmailAliasRestrictionEnabled && (strings.Contains(localPart, "+") || strings.Contains(localPart, ".")) {
+		return "管理员已启用邮箱地址别名限制，您的邮箱地址由于包含特殊符号而被拒绝。"
+	}
+	return ""
 }
 
 func SendPasswordResetEmail(c *gin.Context) {

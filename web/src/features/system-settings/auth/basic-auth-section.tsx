@@ -51,7 +51,8 @@ const basicAuthSchema = z.object({
   EmailVerificationEnabled: z.boolean(),
   UserSendEmailVerificationEnabled: z.boolean(),
   CloudMailBaseURL: z.string(),
-  CloudMailToken: z.string(),
+  CloudMailUsername: z.string(),
+  CloudMailPassword: z.string(),
   CloudMailRecipient: z.string(),
   RegisterEnabled: z.boolean(),
   EmailDomainRestrictionEnabled: z.boolean(),
@@ -182,10 +183,24 @@ export function BasicAuthSection({ defaultValues }: BasicAuthSectionProps) {
 
           <FormField
             control={form.control}
-            name='CloudMailToken'
+            name='CloudMailUsername'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('Cloud Mail Token')}</FormLabel>
+                <FormLabel>{t('Cloud Mail Admin Email')}</FormLabel>
+                <FormControl>
+                  <Input type='email' autoComplete='username' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='CloudMailPassword'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('Cloud Mail Admin Password')}</FormLabel>
                 <FormControl>
                   <Input type='password' autoComplete='new-password' {...field} />
                 </FormControl>

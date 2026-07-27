@@ -37,7 +37,8 @@ const AUTH_SECTIONS = [
           UserSendEmailVerificationEnabled:
             settings.UserSendEmailVerificationEnabled,
           CloudMailBaseURL: settings.CloudMailBaseURL,
-          CloudMailToken: settings.CloudMailToken,
+          CloudMailUsername: settings.CloudMailUsername,
+          CloudMailPassword: settings.CloudMailPassword,
           CloudMailRecipient: settings.CloudMailRecipient,
           RegisterEnabled: settings.RegisterEnabled,
           EmailDomainRestrictionEnabled: settings.EmailDomainRestrictionEnabled,

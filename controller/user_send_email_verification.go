@@ -51,6 +51,14 @@ type cloudMailEmailListResponse struct {
 	Data    []cloudMailEmail `json:"data"`
 }
 
+type cloudMailTokenResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Token string `json:"token"`
+	} `json:"data"`
+}
+
 var userSendEmailChallenges = struct {
 	sync.Mutex
 	values map[string]userSendEmailChallenge
@@ -70,6 +78,11 @@ func CreateUserSendEmailChallenge(c *gin.Context) {
 	email := model.NormalizeEmail(req.Email)
 	if err := common.Validate.Var(email, "required,email"); err != nil {
 		common.ApiErrorMsg(c, "无效的邮箱地址")
+		return
+	}
+	parts := strings.SplitN(email, "@", 2)
+	if message := emailRestrictionError(parts[0], parts[1]); message != "" {
+		common.ApiErrorMsg(c, message)
 		return
 	}
 	if err := model.EnsureEmailAvailable(email, 0); err != nil {
@@ -169,6 +182,37 @@ func findCloudMailVerification(ctx context.Context, challenge userSendEmailChall
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
 		return false, errors.New("invalid Cloud Mail base URL")
 	}
+	token := strings.TrimSpace(common.CloudMailToken)
+	if username := strings.TrimSpace(common.CloudMailUsername); username != "" || strings.TrimSpace(common.CloudMailPassword) != "" {
+		credentials, err := common.Marshal(map[string]string{"email": username, "password": common.CloudMailPassword})
+		if err != nil {
+			return false, err
+		}
+		tokenRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+"/api/public/genToken", bytes.NewReader(credentials))
+		if err != nil {
+			return false, err
+		}
+		tokenRequest.Header.Set("Content-Type", "application/json")
+		tokenResponse, err := service.GetSSRFProtectedHTTPClient().Do(tokenRequest)
+		if err != nil {
+			return false, err
+		}
+		defer tokenResponse.Body.Close()
+		if tokenResponse.StatusCode != http.StatusOK {
+			return false, fmt.Errorf("Cloud Mail token request returned HTTP %d", tokenResponse.StatusCode)
+		}
+		var result cloudMailTokenResponse
+		if err := common.DecodeJson(tokenResponse.Body, &result); err != nil {
+			return false, err
+		}
+		if result.Code != http.StatusOK || strings.TrimSpace(result.Data.Token) == "" {
+			return false, fmt.Errorf("Cloud Mail token request failed: %s", result.Message)
+		}
+		token = strings.TrimSpace(result.Data.Token)
+	}
+	if token == "" {
+		return false, errors.New("Cloud Mail credentials are not configured")
+	}
 	payload, err := common.Marshal(map[string]any{
 		"toEmail": common.CloudMailRecipient, "sendEmail": challenge.Email, "content": "%" + challenge.Code + "%",
 		"timeSort": "desc", "type": 0, "isDel": 0, "num": 1, "size": 20,
@@ -180,7 +224,7 @@ func findCloudMailVerification(ctx context.Context, challenge userSendEmailChall
 	if err != nil {
 		return false, err
 	}
-	req.Header.Set("Authorization", strings.TrimSpace(common.CloudMailToken))
+	req.Header.Set("Authorization", token)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := service.GetSSRFProtectedHTTPClient().Do(req)
 	if err != nil {

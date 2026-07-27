@@ -85,6 +85,24 @@ func TestIsCloudMailVerificationEmailMatchesCodeInBody(t *testing.T) {
 	assert.False(t, isCloudMailVerificationEmail(email, challenge))
 }
 
+func TestEmailRestrictionErrorAppliesToUserSentVerification(t *testing.T) {
+	originalDomainEnabled := common.EmailDomainRestrictionEnabled
+	originalAliasEnabled := common.EmailAliasRestrictionEnabled
+	originalWhitelist := common.EmailDomainWhitelist
+	common.EmailDomainRestrictionEnabled = true
+	common.EmailAliasRestrictionEnabled = true
+	common.EmailDomainWhitelist = []string{"example.com"}
+	t.Cleanup(func() {
+		common.EmailDomainRestrictionEnabled = originalDomainEnabled
+		common.EmailAliasRestrictionEnabled = originalAliasEnabled
+		common.EmailDomainWhitelist = originalWhitelist
+	})
+
+	assert.NotEmpty(t, emailRestrictionError("person+alias", "example.com"))
+	assert.NotEmpty(t, emailRestrictionError("person", "other.example"))
+	assert.Empty(t, emailRestrictionError("person", "example.com"))
+}
+
 func setUserSendEmailChallengeForTest(t *testing.T, challenge userSendEmailChallenge) {
 	t.Helper()
 	userSendEmailChallenges.Lock()
